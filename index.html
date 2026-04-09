@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>曹轩瑜 · 应用物理学 · AI 人机协作</title>
+    <style>
+        /* 全局变量 & 重置 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #f8fafc; --bg-secondary: #ffffff;
+            --text-primary: #0f172a; --text-secondary: #334155; --text-muted: #64748b;
+            --accent-primary: #2563eb; --accent-secondary: #7c3aed;
+            --border-light: #e2e8f0; --card-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            --hover-shadow: 0 20px 30px -10px rgba(37,99,235,0.15);
+            --gradient-bg: linear-gradient(145deg, #f1f5f9 0%, #ffffff 100%);
+            --nav-bg: rgba(255,255,255,0.75); --footer-bg: #f1f5f9;
+            --badge-bg: #eef2ff; --badge-text: #2563eb;
+        }
+        body.dark {
+            --bg-primary: #0b1120; --bg-secondary: #1e293b;
+            --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #94a3b8;
+            --accent-primary: #3b82f6; --accent-secondary: #a78bfa;
+            --border-light: #334155; --card-shadow: 0 15px 25px -8px rgba(0,0,0,0.4);
+            --hover-shadow: 0 20px 30px -8px rgba(59,130,246,0.25);
+            --gradient-bg: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+            --nav-bg: rgba(15,23,42,0.8); --footer-bg: #0f172a;
+            --badge-bg: #1e2b4d; --badge-text: #90cdf4;
+        }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary); color: var(--text-primary);
+            line-height: 1.6; transition: background 0.2s, color 0.2s; padding-top: 70px;
+        }
+        @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%; background: var(--nav-bg);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-light); padding: 0.75rem 2rem;
+            display: flex; align-items: center; justify-content: space-between; z-index: 1000;
+        }
+        .logo { font-weight: 700; font-size: 1.6rem; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .nav-links { display: flex; gap: 1.8rem; }
+        .nav-links a { text-decoration: none; color: var(--text-secondary); font-weight: 500; }
+        .nav-links a:hover { color: var(--accent-primary); }
+        .nav-actions { display: flex; gap: 10px; }
+        .icon-btn {
+            background: var(--bg-secondary); border: 1px solid var(--border-light); color: var(--text-primary);
+            padding: 0.5rem 1rem; border-radius: 40px; font-weight: 500; cursor: pointer;
+            box-shadow: var(--card-shadow); transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .icon-btn:hover { background: var(--accent-primary); color: white; border-color: var(--accent-primary); transform: translateY(-1px); }
+        .container { max-width: 1280px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
+        .card {
+            background: var(--bg-secondary); border-radius: 28px; padding: 1.8rem 2rem;
+            box-shadow: var(--card-shadow); border: 1px solid var(--border-light);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover { box-shadow: var(--hover-shadow); transform: translateY(-4px); }
+        .hero {
+            background: var(--gradient-bg); border-radius: 36px; padding: 2.5rem 2.8rem;
+            border: 1px solid var(--border-light); margin-bottom: 2.5rem;
+        }
+        .hero h1 { font-size: 3.2rem; font-weight: 700; }
+        .badge-container { display: flex; flex-wrap: wrap; gap: 10px; margin: 1rem 0; }
+        .badge {
+            background: var(--badge-bg); color: var(--badge-text); padding: 0.35rem 1.2rem;
+            border-radius: 40px; font-size: 0.85rem; font-weight: 500; border: 1px solid var(--border-light);
+        }
+        .contact-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
+        .btn-primary {
+            background: var(--accent-primary); color: white; border: none; padding: 0.8rem 2rem;
+            border-radius: 60px; font-weight: 600; cursor: pointer; transition: 0.15s;
+            box-shadow: 0 6px 12px -6px var(--accent-primary);
+        }
+        .btn-primary:hover { background: var(--accent-secondary); transform: scale(1.02); }
+        .btn-outline {
+            background: transparent; border: 1.5px solid var(--border-light); color: var(--text-primary);
+            padding: 0.8rem 2rem; border-radius: 60px; font-weight: 500; cursor: pointer;
+        }
+        .highlights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 1.5rem; margin: 2.5rem 0; }
+        .stat-card { background: var(--bg-secondary); border-radius: 24px; padding: 1.5rem; text-align: center; border: 1px solid var(--border-light); }
+        .stat-number { font-size: 2.8rem; font-weight: 800; color: var(--accent-primary); }
+        .tabs-container { margin: 1.5rem 0; }
+        .tab-list { display: flex; gap: 6px; border-bottom: 2px solid var(--border-light); padding-bottom: 6px; margin-bottom: 1.8rem; }
+        .tab-btn {
+            background: none; border: none; padding: 0.8rem 2rem; font-size: 1rem; font-weight: 600;
+            color: var(--text-muted); cursor: pointer; border-radius: 40px 40px 0 0; transition: all 0.15s;
+        }
+        .tab-btn[aria-selected="true"] { color: var(--accent-primary); box-shadow: inset 0 -3px 0 var(--accent-primary); }
+        .tab-panel[hidden] { display: none; }
+        .exp-item { margin-bottom: 2rem; border-left: 3px solid var(--accent-primary); padding-left: 1.5rem; }
+        .exp-header { display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 0.5rem; }
+        .exp-title { font-size: 1.3rem; font-weight: 700; }
+        .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 1.8rem; }
+        .project-card { background: var(--bg-secondary); border-radius: 24px; padding: 1.5rem; border: 1px solid var(--border-light); }
+        .gallery { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 1rem; }
+        .gallery img {
+            width: 100px; height: 100px; object-fit: cover; border-radius: 16px;
+            border: 1px solid var(--border-light); background: var(--bg-primary);
+            transition: transform 0.15s; cursor: pointer;
+        }
+        .gallery img:hover { transform: scale(1.05); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .img-placeholder {
+            width: 100px; height: 100px; border-radius: 16px; background: var(--border-light);
+            display: flex; align-items: center; justify-content: center; font-size: 0.7rem;
+            color: var(--text-muted); text-align: center; border: 1px dashed var(--text-muted);
+        }
+        .lightbox {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+        .lightbox.active { display: flex; }
+        .lightbox-content { max-width: 90vw; max-height: 90vh; border-radius: 16px; border: 2px solid var(--border-light); }
+        .lightbox-close { position: absolute; top: 30px; right: 40px; font-size: 48px; color: white; cursor: pointer; background: none; border: none; }
+        .skill-matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 2rem; }
+        .progress-bar { height: 8px; background: var(--border-light); border-radius: 20px; margin: 8px 0 16px; }
+        .progress-fill { height: 8px; border-radius: 20px; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); }
+        .back2top {
+            position: fixed; bottom: 30px; right: 30px; width: 48px; height: 48px; border-radius: 30px;
+            background: var(--accent-primary); color: white; border: none; box-shadow: var(--card-shadow);
+            cursor: pointer; font-size: 24px; display: none; align-items: center; justify-content: center; z-index: 99;
+        }
+        footer { margin-top: 4rem; text-align: center; color: var(--text-muted); padding: 2rem; }
+        @media (max-width: 700px) {
+            .navbar { padding: 0.5rem 1rem; } .nav-links { display: none; } .container { padding: 1rem; } .hero h1 { font-size: 2.4rem; }
+        }
+        @media print {
+            .navbar, .back2top, .nav-actions, .btn-primary, .btn-outline, .icon-btn, .tab-list, .lightbox { display: none !important; }
+            body { padding-top: 0; background: white; color: black; }
+            .card, .hero { box-shadow: none; border: 1px solid #ccc; }
+        }
+        .copy-feedback { margin-left: 10px; color: var(--accent-secondary); }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">曹轩瑜</div>
+        <div class="nav-links">
+            <a href="#hero">首页</a><a href="#highlights">亮点</a><a href="#experience">经历</a><a href="#projects">项目</a><a href="#skills">技能</a>
+        </div>
+        <div class="nav-actions">
+            <button class="icon-btn" id="themeToggle">🌙 深色</button>
+            <button class="icon-btn" id="printBtn">🖨️ 打印</button>
+        </div>
+    </nav>
+
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose">&times;</button>
+        <img class="lightbox-content" id="lightboxImg" alt="预览">
+    </div>
+
+    <main id="app" class="container"></main>
+    <button class="back2top" id="back2top">↑</button>
+    <footer id="footer"></footer>
+
+    <script>
+        (function(){
+            const resume = {
+                name: "曹轩瑜", title: "应用物理学 · AI人机协作 · 终身学习者",
+                phone: "+86 13994753622", email: "baiyubaiyu681@qq.com",
+                location: "山西省临汾市", birth: "2007.07",
+                education: { school: "太原理工大学 (211)", department: "物理与光电工程学院 · 应用物理学", period: "2025.09 - 至今 (预计2029.06毕业)", gpa: "3.8 (专业前10%)" },
+                honors: ["第十八届国际先进机器人及仿真技术大赛 国家级三等奖"],
+                research: {
+                    group: "微纳光电子器件设计及应用课题组", role: "核心开发成员", period: "2026.02 - 至今",
+                    desc: "基于OptoGPT架构进行冷反射镜自动化设计。人机协作建模，通过遗传算法将设计准确率从46%提升至84.15%。",
+                    images: ["科研项目1.png", "科研项目2.png"]
+                },
+                pkm: "Obsidian数字化大脑，双向链接知识网络。",
+                自媒体: { platform: "知乎/公众号", desc: "人文、艺术、哲学深度输出，全平台数百关注者。", image: "自媒体.jpg" },
+                campus: [{ org: "校科学技术协会 · 组织部/ERP部员", period: "2025.10-2026.07", points: ["ERP沙盘模拟决策建模", "推动多场校级活动落地"] }],
+                certifications: ["阿里达摩院 · 高级人工智能训练师","百度智能云 · 生成式AI资深认证工程师","阿里云四项专项技能认证"],
+                certImages: ["AI认证1.png","AI认证2.jpg","AI认证3.jpg","AI认证4.png","AI认证5.png"],
+                竞赛证书: "竞赛证书.jpg", language: "CET-4 (568分)",
+                selfEval: "跨学科建模思维，物理严谨+AI算法，人机协同。言行一致，延迟满足，极致审美。",
+                colorWorks: ["1.jpg","2.jpg","3.jpg","4.jpg","5.jpg"],
+                pptWorks: ["PPT1.jpg","PPT2.jpg","PPT3.jpg"],
+                skills: { "AI工具链":95, "Python/数据分析":80, "Obsidian/PKM":90, "PPT视觉设计":88, "科研建模":85, "英语读写":78 }
+            };
+
+            const app = document.getElementById('app');
+            const footer = document.getElementById('footer');
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightboxImg');
+
+            function openLightbox(src) { lightboxImg.src = src; lightbox.classList.add('active'); }
+            document.getElementById('lightboxClose').onclick = ()=> lightbox.classList.remove('active');
+            lightbox.onclick = (e)=> { if(e.target===lightbox) lightbox.classList.remove('active'); };
+            window.addEventListener('keydown', e=> { if(e.key==='Escape') lightbox.classList.remove('active'); });
+
+            function createImage(src, alt='') {
+                const img = document.createElement('img');
+                img.src = src; img.alt = alt; img.loading = 'lazy';
+                img.onerror = function() {
+                    const ph = document.createElement('div'); ph.className = 'img-placeholder';
+                    ph.textContent = src.length>20? src.slice(0,15)+'…' : src;
+                    this.replaceWith(ph);
+                };
+                img.addEventListener('click', (e)=>{ e.stopPropagation(); openLightbox(src); });
+                return img;
+            }
+            function renderGallery(images, prefix='') {
+                const div = document.createElement('div'); div.className = 'gallery';
+                images.forEach(src => div.appendChild(createImage(src, prefix)));
+                return div;
+            }
+
+            // 初始化所有Tabs (增强可靠性)
+            function initAllTabs() {
+                document.querySelectorAll('.tabs-container').forEach(container => {
+                    const tabs = container.querySelectorAll('[role="tab"]');
+                    const panels = container.querySelectorAll('[role="tabpanel"]');
+                    const switchTab = (targetId) => {
+                        tabs.forEach(t => t.setAttribute('aria-selected', t.dataset.tab === targetId ? 'true' : 'false'));
+                        panels.forEach(p => p.hidden = (p.id !== targetId));
+                    };
+                    tabs.forEach(tab => {
+                        tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+                        tab.addEventListener('keydown', (e) => {
+                            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                                e.preventDefault();
+                                const arr = Array.from(tabs);
+                                const idx = arr.indexOf(document.activeElement);
+                                const next = e.key==='ArrowRight' ? (idx+1)%arr.length : (idx-1+arr.length)%arr.length;
+                                arr[next].focus();
+                                switchTab(arr[next].dataset.tab);
+                            }
+                        });
+                    });
+                });
+            }
+
+            function renderAll() {
+                app.innerHTML = '';
+                // Hero
+                const hero = document.createElement('section'); hero.className = 'hero'; hero.id = 'hero';
+                hero.innerHTML = `<div><h1>${resume.name}</h1><p style="font-size:1.3rem;">${resume.title}</p>
+                    <div class="badge-container"><span class="badge">🏅 高级AI训练师</span><span class="badge">⚡ 生成式AI资深</span><span class="badge">🧠 人机协作专家</span><span class="badge">📊 准确率+84%</span></div>
+                    <div class="contact-buttons"><button class="btn-primary" id="copyEmailBtn">📧 复制邮箱</button><button class="btn-outline" id="callPhoneBtn">📞 ${resume.phone}</button><span id="copyFeedback" class="copy-feedback"></span></div>
+                    <p style="margin-top:1.2rem;">📍 ${resume.location} · ${resume.birth}</p></div>`;
+                app.appendChild(hero);
+
+                // 亮点
+                const hl = document.createElement('section'); hl.id = 'highlights';
+                hl.innerHTML = `<h2>✨ 关键成果</h2>`;
+                const grid = document.createElement('div'); grid.className = 'highlights-grid';
+                [{n:"84.15%",l:"冷反射镜准确率"},{n:"GPA 3.8",l:"专业前10%"},{n:"5+",l:"AI认证"},{n:"数百",l:"关注者"}].forEach(s=>{
+                    const c = document.createElement('div'); c.className = 'stat-card';
+                    c.innerHTML = `<div class="stat-number">${s.n}</div><div>${s.l}</div>`; grid.appendChild(c);
+                }); hl.appendChild(grid); app.appendChild(hl);
+
+                // 经历Tabs
+                const expSec = document.createElement('section'); expSec.className = 'card'; expSec.id = 'experience'; expSec.style.marginTop='2rem';
+                expSec.innerHTML = '<h2>📌 经历</h2>';
+                const tabsC = document.createElement('div'); tabsC.className = 'tabs-container';
+                const tabList = document.createElement('div'); tabList.className = 'tab-list'; tabList.setAttribute('role','tablist');
+                ['🔬 科研经历','🎓 校园组织','✍️ 自媒体'].forEach((l,i)=>{
+                    const b = document.createElement('button'); b.className = 'tab-btn'; b.setAttribute('role','tab');
+                    b.setAttribute('aria-selected', i===0 ? 'true' : 'false'); b.textContent = l; b.dataset.tab = `exp-${i}`; tabList.appendChild(b);
+                });
+                tabsC.appendChild(tabList);
+                const panels = document.createElement('div');
+                // panel 0 科研
+                const p0 = document.createElement('div'); p0.className = 'tab-panel'; p0.id = 'exp-0'; p0.setAttribute('role','tabpanel');
+                const expItem = document.createElement('div'); expItem.className = 'exp-item';
+                expItem.innerHTML = `<div class="exp-header"><span class="exp-title">${resume.research.group}</span><span>${resume.research.period}</span></div><p><strong>${resume.research.role}</strong> · ${resume.research.desc}</p>`;
+                expItem.appendChild(renderGallery(resume.research.images,'科研')); p0.appendChild(expItem);
+                const honorP = document.createElement('div'); honorP.className = 'exp-item'; honorP.innerHTML = `<strong>📚 荣誉：</strong>${resume.honors[0]}`; p0.appendChild(honorP);
+                // panel 1 校园
+                const p1 = document.createElement('div'); p1.className = 'tab-panel'; p1.id = 'exp-1'; p1.setAttribute('role','tabpanel'); p1.hidden = true;
+                resume.campus.forEach(c=>{ const d=document.createElement('div'); d.className='exp-item'; d.innerHTML=`<div class="exp-header"><span class="exp-title">${c.org}</span><span>${c.period}</span></div><ul>${c.points.map(p=>`<li>${p}</li>`).join('')}</ul>`; p1.appendChild(d); });
+                // panel 2 自媒体
+                const p2 = document.createElement('div'); p2.className = 'tab-panel'; p2.id = 'exp-2'; p2.setAttribute('role','tabpanel'); p2.hidden = true;
+                const md = document.createElement('div'); md.className = 'exp-item';
+                md.innerHTML = `<strong>📱 自媒体创作者</strong> (${resume.自媒体.platform})<p>${resume.自媒体.desc}</p>`;
+                const mg = document.createElement('div'); mg.className = 'gallery'; mg.appendChild(createImage(resume.自媒体.image,'知乎')); md.appendChild(mg);
+                md.innerHTML += `<p>📘 PKM专家：${resume.pkm}</p>`; p2.appendChild(md);
+                panels.append(p0,p1,p2); tabsC.appendChild(panels); expSec.appendChild(tabsC); app.appendChild(expSec);
+
+                // ---------- 项目与作品 Tabs (完全重写，确保视觉作品正确) ----------
+                const projSec = document.createElement('section'); projSec.className = 'card'; projSec.id = 'projects'; projSec.style.marginTop='2rem';
+                projSec.innerHTML = '<h2>🚀 项目与作品</h2>';
+                const projTabsC = document.createElement('div'); projTabsC.className = 'tabs-container';
+                const projTabList = document.createElement('div'); projTabList.className = 'tab-list'; projTabList.setAttribute('role','tablist');
+                
+                // 创建两个标签按钮
+                const tabResearch = document.createElement('button'); tabResearch.className = 'tab-btn'; tabResearch.setAttribute('role','tab');
+                tabResearch.setAttribute('aria-selected', 'true'); tabResearch.textContent = '🧪 科研项目'; tabResearch.dataset.tab = 'proj-research';
+                const tabVisual = document.createElement('button'); tabVisual.className = 'tab-btn'; tabVisual.setAttribute('role','tab');
+                tabVisual.setAttribute('aria-selected', 'false'); tabVisual.textContent = '🎨 视觉作品'; tabVisual.dataset.tab = 'proj-visual';
+                projTabList.append(tabResearch, tabVisual);
+                projTabsC.appendChild(projTabList);
+
+                // 面板容器
+                const projPanels = document.createElement('div');
+                
+                // 科研项目面板 (ID: proj-research)
+                const panelResearch = document.createElement('div'); panelResearch.className = 'tab-panel'; panelResearch.id = 'proj-research'; panelResearch.setAttribute('role','tabpanel');
+                const gridRes = document.createElement('div'); gridRes.className = 'project-grid';
+                const cardRes = document.createElement('div'); cardRes.className = 'project-card';
+                cardRes.innerHTML = '<h3>冷反射镜自动化设计</h3><p>OptoGPT + 遗传算法，准确率46%→84.15%</p>';
+                cardRes.appendChild(renderGallery(resume.research.images, '科研项目')); 
+                gridRes.appendChild(cardRes); 
+                panelResearch.appendChild(gridRes);
+                
+                // 视觉作品面板 (ID: proj-visual) —— 包含调色作品和PPT作品 + 描述文字
+                const panelVisual = document.createElement('div'); panelVisual.className = 'tab-panel'; panelVisual.id = 'proj-visual'; panelVisual.setAttribute('role','tabpanel'); panelVisual.hidden = true;
+                // 添加描述文字
+                const descVisual = document.createElement('p'); 
+                descVisual.style.marginBottom = '1.5rem'; 
+                descVisual.style.fontSize = '1.1rem';
+                descVisual.style.color = 'var(--text-secondary)';
+                descVisual.innerHTML = '✨ 审美设计 · 擅长PPT制作和摄影后期调色';
+                panelVisual.appendChild(descVisual);
+                
+                const visualGrid = document.createElement('div'); visualGrid.className = 'project-grid';
+                
+                // 调色作品卡片
+                const cardColor = document.createElement('div'); cardColor.className = 'project-card';
+                cardColor.innerHTML = '<h3>🌈 调色作品</h3><p style="margin-bottom:8px;">摄影后期调色</p>';
+                cardColor.appendChild(renderGallery(resume.colorWorks, '调色作品'));
+                visualGrid.appendChild(cardColor);
+                
+                // PPT作品卡片
+                const cardPPT = document.createElement('div'); cardPPT.className = 'project-card';
+                cardPPT.innerHTML = '<h3>📊 PPT设计作品</h3><p style="margin-bottom:8px;">视觉化表达与演示设计</p>';
+                cardPPT.appendChild(renderGallery(resume.pptWorks, 'PPT作品'));
+                visualGrid.appendChild(cardPPT);
+                
+                // 竞赛证书卡片 (可选)
+                const cardCert = document.createElement('div'); cardCert.className = 'project-card';
+                cardCert.innerHTML = '<h3>🏅 竞赛证书</h3>';
+                const certGal = document.createElement('div'); certGal.className = 'gallery'; 
+                certGal.appendChild(createImage(resume.竞赛证书, '竞赛证书')); 
+                cardCert.appendChild(certGal);
+                visualGrid.appendChild(cardCert);
+                
+                panelVisual.appendChild(visualGrid);
+                
+                projPanels.append(panelResearch, panelVisual);
+                projTabsC.appendChild(projPanels);
+                projSec.appendChild(projTabsC);
+                app.appendChild(projSec);
+
+                // 技能矩阵
+                const skillSec = document.createElement('section'); skillSec.className = 'card'; skillSec.id = 'skills'; skillSec.style.marginTop='2rem';
+                skillSec.innerHTML = '<h2>📊 技能矩阵 & 证书</h2>';
+                const matrix = document.createElement('div'); matrix.className = 'skill-matrix';
+                Object.entries(resume.skills).forEach(([k,v])=>{ const c=document.createElement('div'); c.innerHTML=`<strong>${k}</strong><div class="progress-bar"><div class="progress-fill" style="width:${v}%"></div></div>`; matrix.appendChild(c); });
+                skillSec.appendChild(matrix);
+                const edu = document.createElement('div'); edu.style.marginTop='2rem';
+                edu.innerHTML = `<h3>🎓 教育</h3><p><strong>${resume.education.school}</strong> · ${resume.education.department}<br>${resume.education.period} · GPA ${resume.education.gpa}</p>`;
+                skillSec.appendChild(edu);
+                const certBlock = document.createElement('div'); certBlock.style.marginTop='1.5rem';
+                certBlock.innerHTML = `<h3>📜 专业认证</h3><ul>${resume.certifications.map(c=>`<li>${c}</li>`).join('')}</ul>`;
+                certBlock.appendChild(renderGallery(resume.certImages,'认证')); certBlock.innerHTML += `<p>🌐 ${resume.language}</p>`;
+                skillSec.appendChild(certBlock);
+                const evalDiv = document.createElement('div'); evalDiv.style.marginTop='1.8rem';
+                evalDiv.innerHTML = `<p style="font-style:italic; border-left:4px solid var(--accent-primary); padding-left:1.5rem;">“${resume.selfEval}”</p>`;
+                skillSec.appendChild(evalDiv);
+                app.appendChild(skillSec);
+
+                footer.innerHTML = `© 2026 曹轩瑜 · 更新于2026.04 · 言行一致，极致追求`;
+
+                // 重新初始化所有Tabs (确保新生成的Tabs生效)
+                initAllTabs();
+            }
+
+            renderAll();
+
+            // 主题、打印、返回顶部等
+            const themeBtn = document.getElementById('themeToggle');
+            themeBtn.onclick = ()=>{ document.body.classList.toggle('dark'); themeBtn.innerHTML = document.body.classList.contains('dark') ? '☀️ 浅色' : '🌙 深色'; };
+            document.getElementById('printBtn').onclick = ()=> window.print();
+            const backBtn = document.getElementById('back2top');
+            window.onscroll = ()=> backBtn.style.display = window.scrollY>400?'flex':'none';
+            backBtn.onclick = ()=> window.scrollTo({top:0,behavior:'smooth'});
+            document.addEventListener('click', e => {
+                if(e.target.id === 'copyEmailBtn') {
+                    navigator.clipboard?.writeText('baiyubaiyu681@qq.com').then(()=>{
+                        const fb = document.getElementById('copyFeedback'); fb.textContent = '✅ 已复制'; setTimeout(()=> fb.textContent='',1500);
+                    });
+                }
+                if(e.target.id === 'callPhoneBtn') window.location.href = `tel:${resume.phone}`;
+            });
+            document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', e => {
+                e.preventDefault(); const id = a.getAttribute('href'); if(id) document.querySelector(id)?.scrollIntoView({behavior:'smooth'});
+            }));
+        })();
+    </script>
+</body>
+</html>
